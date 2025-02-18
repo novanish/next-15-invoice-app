@@ -1,0 +1,8 @@
+export const formatCurrency = (value: number, currency: string = "USD") => {
+  const numberFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency,
+  });
+
+  return numberFormatter.format(value);
+};
