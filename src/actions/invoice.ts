@@ -19,7 +19,8 @@ export async function createInvoice(_: unknown, formData: FormData) {
   }
 
   const { user } = await requiredUser();
-  await db.invoice.create({
+  const { id } = await db.invoice.create({
+    select: { id: true },
     data: {
       userId: user.id!,
       ...submission.value,
@@ -30,6 +31,7 @@ export async function createInvoice(_: unknown, formData: FormData) {
 
   await sendInvoiceCreatedEmail({
     to: [{ email: user.email! }],
+    invoiceId: id,
     inoviceData: {
       clientName: submission.value.clientName,
       invoiceNumber: submission.value.invoiceNumber.toString(),
