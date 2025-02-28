@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteInvoice, markAsPaid } from "@/actions/invoice";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { InvoiceStatus } from "@prisma/client";
 import {
   CheckCircle,
   DownloadCloudIcon,
@@ -16,6 +18,7 @@ import {
   Trash,
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface Props {
   id: string;
@@ -23,7 +26,17 @@ interface Props {
 }
 
 export function InvoiceActions({ id, status }: Props) {
-  const handleSendReminder = () => {};
+  const handleSendReminder = () => {
+    const fetchPromise = fetch(`/api/email/${id}`, {
+      method: "POST",
+    });
+
+    toast.promise(fetchPromise, {
+      loading: "Sending reminder...",
+      success: "Reminder sent!",
+      error: "Failed to send reminder",
+    });
+  };
 
   return (
     <DropdownMenu>
@@ -50,15 +63,15 @@ export function InvoiceActions({ id, status }: Props) {
           <Mail className="size-4 mr-2" /> Reminder Email
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/dashboard/invoices/${id}/delete`}>
+          <button onClick={() => deleteInvoice(id)}>
             <Trash className="size-4 mr-2" /> Delete Invoice
-          </Link>
+          </button>
         </DropdownMenuItem>
-        {status !== "PAID" && (
+        {status !== InvoiceStatus.PAID && (
           <DropdownMenuItem asChild>
-            <Link href={`/dashboard/invoices/${id}/paid`}>
+            <button onClick={() => markAsPaid(id)}>
               <CheckCircle className="size-4 mr-2" /> Mark as Paid
-            </Link>
+            </button>
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
