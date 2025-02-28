@@ -6,7 +6,9 @@ import { sendInvoiceCreatedEmail } from "@/lib/mail";
 import { requiredUser } from "@/lib/required-user";
 import { createInvoiceSchema } from "@/schemas/invoice";
 import { parseWithZod } from "@conform-to/zod";
+import { InvoiceStatus } from "@prisma/client";
 import { formatDate } from "date-fns";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createInvoice(_: unknown, formData: FormData) {
@@ -90,4 +92,31 @@ export async function editInvoice(_: unknown, formData: FormData) {
   });
 
   redirect("/dashboard/invoices");
+}
+
+export async function deleteInvoice(invoiceId: string) {
+  const { user } = await requiredUser();
+  await db.invoice.delete({
+    where: {
+      userId: user.id,
+      id: invoiceId,
+    },
+  });
+
+  revalidatePath("/dashboard/invoices");
+}
+
+export async function markAsPaid(invoiceId: string) {
+  const { user } = await requiredUser();
+  await db.invoice.update({
+    where: {
+      userId: user.id,
+      id: invoiceId,
+    },
+    data: {
+      status: InvoiceStatus.PAID,
+    },
+  });
+
+  revalidatePath("/dashboard/invoices");
 }
