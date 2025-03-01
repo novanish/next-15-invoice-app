@@ -36,3 +36,19 @@ export async function sendInvoiceCreatedEmail({
     },
   });
 }
+
+export async function sendReminderEmail(
+  to: Array<{ email: string; name?: string }>,
+  invoiceNumber: string,
+  invoiceAmount: string
+) {
+  await mailClient.send({
+    from: getSender(),
+    to,
+    template_uuid: "5eb733fd-fd42-41e2-bef8-e15fbba53975",
+    template_variables: {
+      invoiceNumber,
+      invoiceAmount,
+    },
+  });
+}
